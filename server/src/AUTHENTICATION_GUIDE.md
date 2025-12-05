@@ -1,6 +1,6 @@
 # Authentication System Guide
 
-This document explains how to use the authentication and authorization system in the Willow CRM application.
+This document explains how to use the authentication and authorization system in the TimbitER application.
 
 ## Features
 

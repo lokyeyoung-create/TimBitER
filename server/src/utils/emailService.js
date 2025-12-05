@@ -26,7 +26,7 @@ const getTransporter = () => {
 export const sendEmail = async ({ to, subject, html, text }) => {
   const mailOptions = {
     from: {
-      name: "Willow CRM",
+      name: "TimbitER",
       address: process.env.EMAIL_USER,
     },
     to: to,
@@ -52,12 +52,12 @@ export const sendResetEmail = async (email, resetUrl, firstName) => {
         <a href="${resetUrl}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Reset Password</a>
         <p>This link will expire in 1 hour.</p>
         <p>If you didn't request this, please ignore this email.</p>
-        <p>Best regards,<br>Willow CRM Team</p>
+        <p>Best regards,<br>TimbitER Team</p>
       `;
 
   return sendEmail({
     to: email,
-    subject: `Password Reset Request - Willow CRM`,
+    subject: `Password Reset Request - TimbitER`,
     html: emailHTML,
   });
 };
@@ -120,12 +120,12 @@ export const sendDocumentNotification = async ({
           <p>If you have any questions, please don't hesitate to contact our office.</p>
           
           <p>Best regards,<br>
-          Willow CRM Medical Team</p>
+          TimbitER Medical Team</p>
         </div>
         
         <div class="footer">
           <p>This is an automated email. Please do not reply directly to this message.</p>
-          <p>© 2025 Willow CRM. All rights reserved.</p>
+          <p>© 2025 TimbitER. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -144,7 +144,7 @@ export const sendDocumentNotification = async ({
     You can view and download this document by logging into your patient portal.
     
     Best regards,
-    Willow CRM Medical Team
+    TimbitER Medical Team
   `;
 
   return sendEmail({ to: patientEmail, subject, html, text });
@@ -265,12 +265,12 @@ export const sendAppointmentConfirmation = async ({
           <p>If you have any questions or need to make changes to your appointment, please contact us as soon as possible.</p>
           
           <p>Best regards,<br>
-          Willow CRM Medical Team</p>
+          TimbitER Medical Team</p>
         </div>
         
         <div class="footer">
           <p>This is an automated email. Please do not reply directly to this message.</p>
-          <p>© 2025 Willow CRM. All rights reserved.</p>
+          <p>© 2025 TimbitER. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -279,7 +279,7 @@ export const sendAppointmentConfirmation = async ({
 
   return sendEmail({
     to: patientEmail,
-    subject: `Appointment Confirmation - Willow CRM`,
+    subject: `Appointment Confirmation - TimbitER`,
     html: emailHTML,
     text: `
       Appointment Confirmation
@@ -301,7 +301,7 @@ export const sendAppointmentConfirmation = async ({
       - Cancel at least 24 hours in advance if needed
       
       Best regards,
-      Willow CRM Medical Team
+      TimbitER Medical Team
     `,
   });
 };
@@ -357,7 +357,7 @@ export const sendAppointmentCancellation = async ({
           </center>
           
           <p>Best regards,<br>
-          Willow CRM Medical Team</p>
+          TimbitER Medical Team</p>
         </div>
         
         <div class="footer">
@@ -370,7 +370,7 @@ export const sendAppointmentCancellation = async ({
 
   return sendEmail({
     to: patientEmail,
-    subject: `Appointment Cancellation - Willow CRM`,
+    subject: `Appointment Cancellation - TimbitER`,
     html: emailHTML,
   });
 };

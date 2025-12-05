@@ -285,10 +285,10 @@ export const sendRefillRequest = async (req, res) => {
       lastRefillDate,
     } = req.body;
 
-    // Email to Willow CRM
+    // Email to TimbitER
     const adminMailOptions = {
       from: process.env.EMAIL_USER,
-      to: "willowcrm@example.com", // Replace with your admin email
+      to: "timbiter@example.com", // Replace with your admin email
       subject: `Medication Refill Request - ${patientName}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -316,7 +316,7 @@ export const sendRefillRequest = async (req, res) => {
 
           <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
             <p style="color: #666; font-size: 12px;">
-              This is an automated refill request from the Willow CRM patient portal.
+              This is an automated refill request from the TimbitER patient portal.
             </p>
           </div>
         </div>
@@ -353,7 +353,7 @@ export const sendRefillRequest = async (req, res) => {
 
           <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
             <p style="color: #666; font-size: 12px;">
-              This is an automated message from Willow CRM. Please do not reply to this email.
+              This is an automated message from TimbitER. Please do not reply to this email.
             </p>
           </div>
         </div>

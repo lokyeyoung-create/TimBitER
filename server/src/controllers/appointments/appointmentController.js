@@ -844,17 +844,17 @@ export const cancelAppointmentWithReason = async (req, res) => {
           ${
             cancelledBy === "patient"
               ? `<p style="font-size: 14px; color: #666; margin-top: 20px;">
-                  If you need to reschedule, please contact the patient or use the Willow CRM portal.
+                  If you need to reschedule, please contact the patient or use the TimbitER portal.
                 </p>`
               : `<p style="font-size: 14px; color: #666; margin-top: 20px;">
-                  If you would like to reschedule, please book another appointment through the Willow CRM portal.
+                  If you would like to reschedule, please book another appointment through the TimbitER portal.
                 </p>`
           }
         </div>
 
         <div style="background-color: #f9fafb; padding: 20px; text-align: center; border-radius: 0 0 10px 10px;">
           <p style="color: #666; font-size: 12px; margin: 0;">
-            This is an automated message from Willow CRM. Please do not reply to this email.
+            This is an automated message from TimbitER. Please do not reply to this email.
           </p>
         </div>
       </div>
@@ -951,7 +951,7 @@ export const markNoShowWithReason = async (req, res) => {
           </div>
 
           <p style="font-size: 14px; color: #666; margin-top: 20px;">
-            If you need to reschedule, please book another appointment through the Willow CRM portal or contact our office.
+            If you need to reschedule, please book another appointment through the TimbitER portal or contact our office.
           </p>
 
           <div style="background-color: #fee2e2; padding: 15px; border-radius: 8px; margin-top: 20px;">
@@ -963,7 +963,7 @@ export const markNoShowWithReason = async (req, res) => {
 
         <div style="background-color: #f9fafb; padding: 20px; text-align: center; border-radius: 0 0 10px 10px;">
           <p style="color: #666; font-size: 12px; margin: 0;">
-            This is an automated message from Willow CRM. Please do not reply to this email.
+            This is an automated message from TimbitER. Please do not reply to this email.
           </p>
         </div>
       </div>
