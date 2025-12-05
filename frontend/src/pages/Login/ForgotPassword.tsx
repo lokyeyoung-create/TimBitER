@@ -1,0 +1,132 @@
+import React, { useState } from "react";
+import Field from "../../components/input/Field";
+import PrimaryButton from "../../components/buttons/PrimaryButton";
+import { useNavigate } from "react-router-dom";
+
+const TopRightBlob = "/onboarding_blob_top_right.svg";
+const BottomLeftBlob = "/onboarding_blob_bottom_left.svg";
+
+const ForgotPassword: React.FC = () => {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [errors, setErrors] = useState<{ email?: string }>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+
+  const validate = () => {
+    const errs: { email?: string } = {};
+
+    if (!email) {
+      errs.email = "Email is required";
+    } else if (!/^\S+@\S+\.\S+$/.test(email)) {
+      errs.email = "Enter a valid email";
+    }
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const handleSubmit = async () => {
+    if (!validate()) return;
+
+    setIsLoading(true);
+    setSubmitMessage(null);
+
+    try {
+      const response = await fetch("/api/auth/request-reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send reset link");
+      }
+
+      setSubmitMessage({
+        type: "success",
+        text: "If an account exists for this email, a reset link has been sent.",
+      });
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+    } catch (err) {
+      console.error(err);
+      setSubmitMessage({
+        type: "error",
+        text: "An error occurred. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="relative w-full min-h-screen bg-white flex flex-col p-8 overflow-hidden">
+      {/* Background blobs */}
+      <img
+        src={TopRightBlob}
+        alt="Top Right Blob"
+        className="absolute top-0 right-0 w-64 h-64 md:w-96 md:h-96"
+      />
+      <img
+        src={BottomLeftBlob}
+        alt="Bottom Left Blob"
+        className="absolute bottom-0 left-[-15px] w-64 h-64 md:w-96 md:h-96"
+      />
+
+      <h1 className="text-4xl md:text-6xl font-bold text-gray-900 absolute top-8 left-8 z-10">
+        TimbitER
+      </h1>
+
+      <div className="z-10 w-full max-w-lg mx-auto mt-32 flex flex-col gap-6">
+        <p className="text-xl md:text-2xl font-semibold text-gray-700">
+          No worries! We'll send you an email to reset your password!
+        </p>
+
+        {/* Email */}
+        <div className="flex flex-col">
+          <label className="text-gray-600 mb-2">Email</label>
+          <Field
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e: any) => setEmail(e.target.value)}
+          />
+          {errors.email && (
+            <span className="text-sm text-red-500 mt-1">{errors.email}</span>
+          )}
+        </div>
+
+        {/* Message feedback */}
+        {submitMessage && (
+          <div
+            className={`p-3 rounded-lg text-sm font-medium ${
+              submitMessage.type === "success"
+                ? "bg-green-50 text-green-700 border border-green-200"
+                : "bg-red-50 text-red-700 border border-red-200"
+            }`}
+          >
+            {submitMessage.text}
+          </div>
+        )}
+
+        {/* Submit */}
+        <div className="mt-6 w-full flex justify-center">
+          <PrimaryButton
+            text={isLoading ? "Sending..." : "Send Reset Link"}
+            variant="primary"
+            size="small"
+            onClick={handleSubmit}
+            disabled={isLoading}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ForgotPassword;
