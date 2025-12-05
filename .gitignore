@@ -29,3 +29,12 @@ coverage/
 
 # TypeScript
 *.tsbuildinfo
+
+node_modules
+/client/src/node_modules
+/server/src/node_modules
+
+# Environment variables
+.env
+/client/src/.env
+/server/src/.env
