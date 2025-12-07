@@ -3,12 +3,15 @@ import { useNavigate } from "react-router-dom";
 import Field from "../../../components/input/Field";
 import PrimaryButton from "../../../components/buttons/PrimaryButton";
 import { useSignup } from "../../../contexts/SignUpContext";
-import { DoctorAccountCreationTicket, ticketService } from "api";
+import { useAuth } from "../../../contexts/AuthContext";
+import { doctorService } from "api/services/doctor.service";
+import { userService } from "api/services/user.service";
 import OnboardingLayout from "components/layouts/OnboardingLayout";
 
 const DoctorOnboarding: React.FC = () => {
   const navigate = useNavigate();
   const { signupData, setSignupData } = useSignup();
+  const { login } = useAuth();
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [loading, setLoading] = React.useState(false);
 
@@ -40,7 +43,7 @@ const DoctorOnboarding: React.FC = () => {
   const handleSubmit = async () => {
     if (!validate()) return;
 
-    const finalPayload: Partial<DoctorAccountCreationTicket> = {
+    const finalPayload = {
       firstName: signupData.firstName,
       lastName: signupData.lastName,
       email: signupData.email,
@@ -52,21 +55,31 @@ const DoctorOnboarding: React.FC = () => {
       education: signupData.education,
       graduationDate: new Date(signupData.graduationDate),
       speciality: signupData.speciality,
-      status: "Pending",
-      notes: "Submitted initial credentials for review.",
     };
 
     try {
       setLoading(true);
-      await ticketService.doctorCreation.submit(finalPayload);
-      alert("Doctor account creation request submitted! Awaiting approval.");
-      navigate("/");
+      // Create the doctor directly
+      const res = await fetch("/api/doctors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(finalPayload),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to create doctor account");
+      }
+
+      const data = await res.json();
+
+      // Log in the new doctor immediately with a token (if available from backend, or use signup flow)
+      // For now, redirect to login or home
+      alert("Doctor account created successfully!");
+      navigate("/login");
     } catch (error: any) {
-      console.error("Error submitting doctor request:", error);
-      alert(
-        error?.response?.data?.message ||
-          "Unexpected error — please try again later."
-      );
+      console.error("Error creating doctor account:", error);
+      alert(error.message || "Unexpected error — please try again later.");
     } finally {
       setLoading(false);
     }

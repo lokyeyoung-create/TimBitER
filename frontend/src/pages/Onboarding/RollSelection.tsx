@@ -23,13 +23,13 @@ const RoleSelection: React.FC = () => {
           onClick={() => navigate("/patientonboarding1")}
         />
 
-        {/* Staff */}
+        {/* Doctor */}
         <RoleSelectionButton
-          text="Staff"
-          icon={<img src={StaffIcon} alt="Staff Icon" className="w-6 h-6" />}
+          text="Doctor"
+          icon={<img src={StaffIcon} alt="Doctor Icon" className="w-6 h-6" />}
           variant="primary"
           size="medium"
-          onClick={() => navigate("/staffonboarding")}
+          onClick={() => navigate("/doctoronboarding")}
         />
       </div>
     </OnboardingLayout>

@@ -3,6 +3,7 @@ import express from "express";
 import { authenticate } from "../../middleware/authentication.js";
 
 import {
+  createDoctor,
   getAllDoctors,
   getDoctorsBySpeciality,
   getDoctorByUserId,
@@ -10,6 +11,10 @@ import {
 } from "../../controllers/doctors/doctorController.js";
 
 const router = express.Router();
+
+// Create new doctor
+router.post("/", createDoctor);
+
 router.get("/user/:userId", authenticate, getDoctorByUserId);
 
 // Update doctor profile by user id
