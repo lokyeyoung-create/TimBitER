@@ -35,8 +35,10 @@ import DoctorDashboard from "pages/Doctor/DoctorDashboard";
 import DoctorPatientsPage from "pages/Doctor/Patients/DoctorPatients";
 import DoctorAppointments from "pages/Doctor/Appointments/DoctorAppointments";
 import PatientProfile from "pages/Patients/Profile";
+import PatientProfileEdit from "pages/Patients/ProfileEdit";
 import AppointmentDetails from "pages/Doctor/Appointments/[id]";
 import DoctorProfile from "pages/Doctor/Profile/Profile";
+import DoctorProfileEdit from "pages/Doctor/Profile/ProfileEdit";
 import PatientAppointmentView from "pages/Patients/Appointments/[id]";
 import DoctorPatientProfile from "pages/Doctor/Patients/[id]";
 import PublicDoctorProfile from "pages/Doctor/Profile/PublicProfile";
@@ -173,6 +175,7 @@ const AppRoutes: React.FC = () => {
           <Route path="/patientdashboard" element={<Dashboard />} />
           <Route path="/appointments" element={<Appointments />} />
           <Route path="/patient-profile" element={<PatientProfile />} />
+          <Route path="/patient-profile-edit" element={<PatientProfileEdit />} />
           <Route
             path="/patient/appointment/:appointmentId"
             element={<PatientAppointmentView />}
@@ -196,6 +199,7 @@ const AppRoutes: React.FC = () => {
           />
           <Route path="/doctorbookmarks" element={<DoctorResearchLibrary />} />
           <Route path="/doctor-profile" element={<DoctorProfile />} />
+          <Route path="/doctor-profile-edit" element={<DoctorProfileEdit />} />
         </Route>
 
         <Route path="/error" element={<Error />} />

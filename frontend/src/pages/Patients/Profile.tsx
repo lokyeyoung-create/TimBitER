@@ -15,6 +15,7 @@ import ProfileInfo from "components/card/ProfileInfoCard";
 import { useRequireRole } from "hooks/useRequireRole";
 import { useAuth } from "contexts/AuthContext";
 import { patientService } from "api/services/patient.service";
+import { getUserBookmarks } from "api/services/bookmark.service";
 import PatientListTable from "components/table/PatientListTable";
 import SuccessModal from "components/modal/SuccessModal";
 const PatientProfile: React.FC = () => {
@@ -25,6 +26,7 @@ const PatientProfile: React.FC = () => {
   const [patient, setPatient] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [bookmarkedDoctors, setBookmarkedDoctors] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchPatient = async () => {
@@ -41,6 +43,27 @@ const PatientProfile: React.FC = () => {
     };
 
     fetchPatient();
+  }, [authUser]);
+
+  useEffect(() => {
+    const fetchBookmarks = async () => {
+      if (!authUser?._id) return;
+      try {
+        const res = await getUserBookmarks(authUser._id);
+        if (res?.success && Array.isArray(res.bookmarks)) {
+          const doctors = res.bookmarks
+            .filter(
+              (b: any) => (b.externalItemType === "doctor" || b.externalItemType === "user") && b.doctor
+            )
+            .map((b: any) => b.doctor);
+          setBookmarkedDoctors(doctors);
+        }
+      } catch (err) {
+        console.error("Error fetching bookmarks:", err);
+      }
+    };
+
+    fetchBookmarks();
   }, [authUser]);
 
   const patientName = authUser?.firstName;
@@ -154,6 +177,38 @@ const PatientProfile: React.FC = () => {
             data={patient?.allergies}
             field="allergen"
           />
+        </div>
+
+        {/* Bookmarked Doctors */}
+        <div className="relative mx-auto w-[90%] max-w-6xl bg-white rounded-xl shadow-md p-6 mt-6">
+          <h2 className="text-lg font-semibold mb-4">Bookmarked Doctors</h2>
+          {bookmarkedDoctors.length === 0 ? (
+            <p className="text-sm text-gray-600">You haven't bookmarked any doctors yet.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {bookmarkedDoctors.map((doctor: any) => (
+                <div key={doctor._id} className="flex items-center p-4 border rounded">
+                  <img
+                    src={doctor.user?.profilePic || doctor.profilePic || "https://placehold.co/64x64"}
+                    alt="doctor"
+                    className="w-12 h-12 rounded-full object-cover mr-4"
+                  />
+                  <div>
+                    <div className="font-semibold">
+                      {doctor.user?.firstName} {doctor.user?.lastName}
+                    </div>
+                    <div className="text-sm text-gray-600">{doctor.speciality}</div>
+                  </div>
+                  <button
+                    onClick={() => navigate(`/doctor/${doctor.user?._id || doctor.user || doctor._id}`)}
+                    className="ml-auto px-3 py-1 bg-primary text-white rounded"
+                  >
+                    View Profile
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

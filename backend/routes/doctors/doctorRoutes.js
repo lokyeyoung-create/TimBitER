@@ -6,10 +6,14 @@ import {
   getAllDoctors,
   getDoctorsBySpeciality,
   getDoctorByUserId,
+  updateDoctorByUserId,
 } from "../../controllers/doctors/doctorController.js";
 
 const router = express.Router();
 router.get("/user/:userId", authenticate, getDoctorByUserId);
+
+// Update doctor profile by user id
+router.put("/user/:userId", authenticate, updateDoctorByUserId);
 
 // Get all doctors
 router.get("/", getAllDoctors);

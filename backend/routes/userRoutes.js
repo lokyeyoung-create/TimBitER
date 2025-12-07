@@ -6,6 +6,7 @@ import {
   getCurrentUser,
   searchUsers,
   searchUsersByRole,
+  updateUser,
 } from "../controllers/userController.js";
 import { authenticate } from "../middleware/authentication.js";
 
@@ -19,5 +20,7 @@ router.get("/email-check", checkEmail);
 router.get("/me", authenticate, getCurrentUser);
 router.get("/search", authenticate, searchUsers);
 router.get("/search/role", authenticate, searchUsersByRole);
+// Update user profile
+router.put("/:id", authenticate, updateUser);
 
 export default router;

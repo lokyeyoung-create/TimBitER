@@ -32,4 +32,7 @@ export const userService = {
   // Get user by ID
   getById: (id: string) => 
     apiClient.get<{ success: boolean; user: User }>(`/users/${id}`),
+  // Update user
+  update: (id: string, data: Partial<User>) =>
+    apiClient.put<{ success: boolean; user: User }>(`/users/${id}`, data),
 };
