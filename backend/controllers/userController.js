@@ -311,3 +311,25 @@ export const getUserById = async (req, res) => {
     });
   }
 };
+
+// PUT /api/users/:id - Update user profile (protected)
+export const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    const allowed = ["firstName", "lastName", "username", "phoneNumber", "profilePic", "gender", "email"];
+    const filtered = {};
+    Object.keys(updates || {}).forEach((k) => {
+      if (allowed.includes(k)) filtered[k] = updates[k];
+    });
+
+    const user = await User.findByIdAndUpdate(id, filtered, { new: true });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    res.json({ success: true, user: user.toJSON() });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({ error: error.message });
+  }
+};

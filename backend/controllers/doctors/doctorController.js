@@ -188,3 +188,31 @@ export const getDoctorByUserId = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+// PUT /api/doctors/user/:userId - update doctor profile fields
+export const updateDoctorByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const updates = req.body;
+
+    // Only allow certain fields on doctor doc
+    const allowed = ["bioContent", "education", "graduationDate", "speciality", "profilePic"];
+    const filtered = {};
+    Object.keys(updates || {}).forEach((k) => {
+      if (allowed.includes(k)) filtered[k] = updates[k];
+    });
+
+    const doctor = await Doctor.findOneAndUpdate({ user: userId }, filtered, { new: true, runValidators: true });
+
+    if (!doctor) {
+      return res.status(404).json({ error: "Doctor not found" });
+    }
+
+    await doctor.populate("user", "firstName lastName phoneNumber profilePic email");
+
+    return res.json({ success: true, doctor });
+  } catch (error) {
+    console.error("Error updating doctor:", error);
+    return res.status(500).json({ error: error.message });
+  }
+};

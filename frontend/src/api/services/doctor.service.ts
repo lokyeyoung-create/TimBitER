@@ -20,4 +20,6 @@ export const doctorService = {
 
   getByUserId: (userId: string) =>
     apiClient.get<Doctor>(`/doctors/user/${userId}`),
+  updateByUserId: (userId: string, data: any) =>
+    apiClient.put(`/doctors/user/${userId}`, data),
 };

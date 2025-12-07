@@ -1,4 +1,5 @@
 import Bookmark from "../models/Bookmark.js";
+import Doctor from "../models/doctors/Doctor.js";
 
 // Create a bookmark
 export const createBookmark = async (req, res) => {
@@ -60,6 +61,40 @@ export const getUserBookmarks = async (req, res) => {
     const { userId } = req.params;
 
     const bookmarks = await Bookmark.find({ userId }).sort({ createdAt: -1 });
+
+    // If there are bookmarked doctors or bookmarked users (doctors may be bookmarked by user id),
+    // fetch their full doctor records. We support bookmarks where `externalItemId` is either a
+    // Doctor._id or a User._id (doctor.user).
+    const doctorOrUserBookmarks = bookmarks.filter(
+      (b) => b.externalItemType === "doctor" || b.externalItemType === "user"
+    );
+
+    if (doctorOrUserBookmarks.length > 0) {
+      const ids = doctorOrUserBookmarks.map((b) => b.externalItemId);
+
+      // Find doctors where either the doctor _id or the referenced user is in the ids list
+      const doctors = await Doctor.find({
+        $or: [{ _id: { $in: ids } }, { user: { $in: ids } }],
+      }).populate("user", "firstName lastName profilePic role");
+
+      const doctorMapByDoctorId = {};
+      const doctorMapByUserId = {};
+      doctors.forEach((d) => {
+        doctorMapByDoctorId[d._id.toString()] = d;
+        if (d.user && d.user._id) doctorMapByUserId[d.user._id.toString()] = d;
+      });
+
+      // Attach doctor details to corresponding bookmarks
+      const bookmarksWithDetails = bookmarks.map((b) => {
+        const obj = b.toObject ? b.toObject() : b;
+        if (b.externalItemType === "doctor" || b.externalItemType === "user") {
+          obj.doctor = doctorMapByDoctorId[b.externalItemId] || doctorMapByUserId[b.externalItemId] || null;
+        }
+        return obj;
+      });
+
+      return res.status(200).json({ success: true, bookmarks: bookmarksWithDetails });
+    }
 
     res.status(200).json({
       success: true,

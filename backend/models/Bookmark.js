@@ -10,7 +10,7 @@ const BookmarkSchema = new mongoose.Schema(
     externalItemType: {
       type: String,
       required: true,
-      enum: ["drug", "disease", "article", "other"],
+      enum: ["drug", "disease", "article", "other", "user", "doctor"],
     },
     externalItemName: {
       type: String,
