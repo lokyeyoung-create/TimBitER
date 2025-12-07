@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import IconSidebar from "./IconSidebar";
-import {
-  House,
-  FileText,
-  Question,
-  Calendar,
-  SignOut,
-} from "phosphor-react";
+import { House, FileText, Question, Calendar, SignOut } from "phosphor-react";
 
 import UserProfileCard from "../card/UserProfileCard";
 import SidebarItem from "./IconSidebar";
@@ -46,8 +40,7 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({}) => {
   const menuItems = [
     { text: "Dashboard", icon: House, path: "/patientdashboard" },
     { text: "Appointments", icon: Calendar, path: "/appointments" },
-    { text: "Medical Records", icon: FileText, path: "/medical-records" },
-    { text: "Profile", icon: FileText, path: "/patient-profile" },
+    { text: "Bookmarks", icon: FileText, path: "/patientbookmarks" },
   ];
 
   const bottomItems = [

@@ -48,13 +48,10 @@ const DoctorSidebar: React.FC<DoctorSidebarProps> = ({}) => {
       path: "/doctorpatients",
     },
     { text: "My Appointments", icon: Calendar, path: "/doctorappointments" },
-    { text: "Profile", icon: IdentificationBadge, path: "/doctor-profile" },
+    { text: "Research Library", icon: Question, path: "/doctorbookmarks" },
   ];
 
-  const bottomItems = [
-    { text: "Help & Support", icon: Question, path: "/doctor-help-support" },
-    { text: "Logout", icon: SignOut, path: "/logout" },
-  ];
+  const bottomItems = [{ text: "Logout", icon: SignOut, path: "/logout" }];
 
   const navigate = useNavigate();
 

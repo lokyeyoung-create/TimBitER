@@ -3,7 +3,6 @@ import "./App.css";
 import PatientSidebar from "./components/sidebar/PatientSidebar";
 import Dashboard from "./pages/Patients/Dashboard";
 import Appointments from "./pages/Patients/Appointments/Appointments";
-import MedicalRecords from "./pages/Patients/MedicalRecords";
 import HelpSupportPage from "./pages/General/HelpSupport";
 import { SignupProvider } from "./contexts/SignUpContext";
 import {
@@ -41,6 +40,8 @@ import DoctorProfile from "pages/Doctor/Profile/Profile";
 import PatientAppointmentView from "pages/Patients/Appointments/[id]";
 import DoctorPatientProfile from "pages/Doctor/Patients/[id]";
 import PublicDoctorProfile from "pages/Doctor/Profile/PublicProfile";
+import PatientBookmarks from "pages/Patients/Bookmarks";
+import DoctorResearchLibrary from "pages/Doctor/DoctorResearchLibrary";
 
 const PatientLayout: React.FC = () => {
   return (
@@ -100,7 +101,6 @@ const Logout: React.FC = () => {
     </div>
   );
 };
-
 
 // Main App Routes Component that uses Auth Context
 const AppRoutes: React.FC = () => {
@@ -172,24 +172,20 @@ const AppRoutes: React.FC = () => {
         <Route element={<PatientLayout />}>
           <Route path="/patientdashboard" element={<Dashboard />} />
           <Route path="/appointments" element={<Appointments />} />
-          <Route path="/medical-records" element={<MedicalRecords />} />
-          <Route path="/help-support" element={<HelpSupportPage />} />
           <Route path="/patient-profile" element={<PatientProfile />} />
           <Route
             path="/patient/appointment/:appointmentId"
             element={<PatientAppointmentView />}
           />
           <Route path="/doctor/:doctorId" element={<PublicDoctorProfile />} />
+          <Route path="/patientbookmarks" element={<PatientBookmarks />} />
         </Route>
 
         {/* Doctor routes */}
         <Route element={<DoctorLayout />}>
           <Route path="/doctordashboard" element={<DoctorDashboard />} />
           <Route path="/doctorpatients" element={<DoctorPatientsPage />} />
-          <Route
-            path="/doctorappointments"
-            element={<DoctorAppointments />}
-          />
+          <Route path="/doctorappointments" element={<DoctorAppointments />} />
           <Route
             path="/doctor/appointment/:appointmentId"
             element={<AppointmentDetails />}
@@ -198,7 +194,7 @@ const AppRoutes: React.FC = () => {
             path="/patient/:patientId"
             element={<DoctorPatientProfile />}
           />
-          <Route path="/doctor-help-support" element={<HelpSupportPage />} />
+          <Route path="/doctorbookmarks" element={<DoctorResearchLibrary />} />
           <Route path="/doctor-profile" element={<DoctorProfile />} />
         </Route>
 

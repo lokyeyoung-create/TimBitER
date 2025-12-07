@@ -12,6 +12,7 @@ import toast from "react-hot-toast";
 import { patientService, availabilityService } from "api";
 import { appointmentService } from "api/services/appointment.service";
 import { useNavigate } from "react-router-dom";
+import MedicalResearchSection from "../../components/dashboard/MedicalResearchSection";
 
 const Dashboard: React.FC = () => {
   // ROLE ENFORCEMENT + AUTH
@@ -49,17 +50,11 @@ const Dashboard: React.FC = () => {
         if (stored) {
           const userParsed = JSON.parse(stored);
 
-          // The user object in localStorage should have the role-specific ID
-          // For a patient user, the _id should be the patient ID
-          // If not, we need to search for the patient by name
-
           try {
-            // First try to get patient directly by the stored ID
             const patient = await patientService.getById(userParsed._id);
             setPatientId(patient._id);
             setPatientEmail(userParsed.email || "");
           } catch (err) {
-            // If that fails, search for patient by name
             console.log("Direct patient fetch failed, searching by name...");
             const fullName = `${userParsed.firstName} ${userParsed.lastName}`;
             const searchResult = await patientService.searchByName(fullName);
@@ -164,9 +159,7 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // ---------------------------------------------
-  // SEARCH + BOOKING LOGIC (from first component)
-  // ---------------------------------------------
+  // SEARCH + BOOKING LOGIC
   const handleSearch = async (doctorQuery: string, dateQuery: string) => {
     try {
       setIsSearching(true);
@@ -205,7 +198,7 @@ const Dashboard: React.FC = () => {
       setSearchResults([]);
     }
   };
-  // Updated handleBookAppointment function in Dashboard.tsx
+
   const handleBookAppointment = (doctorId: string, slot: TimeSlot) => {
     const doctorData = searchResults.find(
       (r) => r.doctor._id === doctorId
@@ -218,7 +211,6 @@ const Dashboard: React.FC = () => {
         typeof u === "string" ? `Dr. ${u}` : `Dr. ${u.firstName} ${u.lastName}`;
     }
 
-    // Validate the time slot is 1 hour (60 minutes)
     console.log("Selected time slot:", slot);
     console.log("Slot start:", slot.startTime, "Slot end:", slot.endTime);
 
@@ -226,7 +218,6 @@ const Dashboard: React.FC = () => {
     const [endHour, endMin] = slot.endTime.split(":").map(Number);
     const durationMinutes = endHour * 60 + endMin - (startHour * 60 + startMin);
 
-    // Allow slots between 30 and 90 minutes (to handle edge cases)
     if (durationMinutes > 90) {
       console.error(
         "ERROR: Time slot is too long:",
@@ -246,7 +237,6 @@ const Dashboard: React.FC = () => {
     setIsBookingModalOpen(true);
   };
 
-  // Fixed handleBookingComplete function in Dashboard.tsx
   const handleBookingComplete = async (formData: any) => {
     if (!selectedBooking || !patientId) {
       toast.error("Missing booking information");
@@ -258,20 +248,16 @@ const Dashboard: React.FC = () => {
 
       const startTime = selectedBooking.timeSlot.startTime;
 
-      // IMPORTANT: Calculate end time as 1 hour after start time
       const [startHour, startMin] = startTime.split(":").map(Number);
       let endHour = startHour + 1;
       let endMin = startMin;
 
-      // Ensure we use the actual slot end time if it's provided and valid
       let endTime = selectedBooking.timeSlot.endTime;
 
-      // Validate the slot is actually 1 hour
       const [slotEndHour, slotEndMin] = endTime.split(":").map(Number);
       const slotDuration =
         slotEndHour * 60 + slotEndMin - (startHour * 60 + startMin);
 
-      // If the slot isn't 60 minutes, force it to be 1 hour
       if (slotDuration !== 60) {
         console.log(
           "Adjusting slot duration from",
@@ -283,13 +269,11 @@ const Dashboard: React.FC = () => {
         ).padStart(2, "0")}`;
       }
 
-      // Get patient email - prioritize the one from state/localStorage
       const storedUser = localStorage.getItem("user");
       const userData = storedUser ? JSON.parse(storedUser) : null;
       const finalPatientEmail =
         patientEmail || userData?.email || authUser?.email;
 
-      // Get doctor email from search results
       let doctorEmail = undefined;
       const doctorData = searchResults.find(
         (r) => r.doctor._id === selectedBooking.doctorId
@@ -301,21 +285,20 @@ const Dashboard: React.FC = () => {
         doctorEmail = doctorData.doctor.user.email;
       }
 
-      // Build appointment data
       const appointmentData = {
         doctorId: selectedBooking.doctorId,
         patientId,
         date: selectedBooking.date,
         startTime,
-        endTime, // This will now be exactly 1 hour after startTime
+        endTime,
         summary: `${
           formData.newOrOngoing === "new" ? "New Condition" : "Follow-up"
         } - ${formData.symptoms?.join(", ") || "General Consultation"}`,
         notes: formData.notes || "",
         symptoms: formData.symptoms || [],
-        duration: 60, // Always 60 minutes for 1-hour slots
+        duration: 60,
         isEmergency: formData.isEmergency || false,
-        patientEmail: finalPatientEmail, // Pass the patient email explicitly
+        patientEmail: finalPatientEmail,
         doctorEmail: doctorEmail,
       };
 
@@ -328,24 +311,20 @@ const Dashboard: React.FC = () => {
         `Appointment booked successfully! Confirmation email sent to ${finalPatientEmail}.`
       );
 
-      // Update search results to remove the booked slot
       setSearchResults((prev) =>
         prev.map((r) => {
           if (r.doctor._id === selectedBooking.doctorId) {
-            // Filter out the booked slot or update the larger slot
             return {
               ...r,
               timeSlots: r.timeSlots.reduce(
                 (slots: any, slot: { startTime: string; endTime: string }) => {
-                  // If this is the exact slot that was booked, remove it
                   if (
                     slot.startTime === startTime &&
                     slot.endTime === endTime
                   ) {
-                    return slots; // Don't include this slot
+                    return slots;
                   }
 
-                  // If this is a larger slot containing the booked time
                   const [slotStartH, slotStartM] = slot.startTime
                     .split(":")
                     .map(Number);
@@ -362,14 +341,12 @@ const Dashboard: React.FC = () => {
                   const bookStartMin = bookStartH * 60 + bookStartM;
                   const bookEndMin = bookEndH * 60 + bookEndM;
 
-                  // If the booked time is within this slot, split it
                   if (
                     bookStartMin >= slotStartMin &&
                     bookEndMin <= slotEndMin
                   ) {
                     const newSlots = [];
 
-                    // Add slot before booked time if there's space
                     if (slotStartMin < bookStartMin) {
                       newSlots.push({
                         ...slot,
@@ -379,7 +356,6 @@ const Dashboard: React.FC = () => {
                       });
                     }
 
-                    // Add slot after booked time if there's space
                     if (bookEndMin < slotEndMin) {
                       newSlots.push({
                         ...slot,
@@ -392,7 +368,6 @@ const Dashboard: React.FC = () => {
                     return [...slots, ...newSlots];
                   }
 
-                  // Otherwise, keep the slot as is
                   return [...slots, slot];
                 },
                 [] as typeof r.timeSlots
@@ -403,7 +378,6 @@ const Dashboard: React.FC = () => {
         })
       );
 
-      // Refresh appointments list
       try {
         const appointments = (await appointmentService.getPatientAppointments(
           patientId
@@ -542,8 +516,11 @@ const Dashboard: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-9 gap-8">
-              {/* LEFT SIDE */}
+              {/* LEFT SIDE - ADD MEDICAL RESEARCH HERE */}
               <div className="lg:col-span-6">
+                <MedicalResearchSection
+                  onViewAllBookmarks={() => navigate("/patientbookmarks")}
+                />
               </div>
 
               {/* RIGHT SIDE */}

@@ -29,7 +29,7 @@ import appointmentRoutes from "./routes/appointments/appointmentRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import bookmarkRoutes from "./routes/bookmarkRoutes.js";
 import followRoutes from "./routes/followRoutes.js";
-
+import bookmarkRoutesApi from "./routes/bookmark/bookmarksApi.js";
 import authRoutes from "./routes/auth/authRoutes.js";
 // Setup Express
 const app = express();
@@ -50,6 +50,7 @@ app.use("/api/appointments", appointmentRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/bookmarks", bookmarkRoutes);
 app.use("/api/follows", followRoutes);
+app.use("/api/bookmarksapi", bookmarkRoutesApi);
 
 // Start server
 const PORT = process.env.PORT || 5050;
