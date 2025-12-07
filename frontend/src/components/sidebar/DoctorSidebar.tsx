@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import IconSidebar from "./IconSidebar";
 import {
   House,
-  ChatCircle,
-  Bug,
   Question,
   Calendar,
   SignOut,
@@ -21,7 +19,7 @@ interface DoctorSidebarProps {
 }
 
 const DoctorSidebar: React.FC<DoctorSidebarProps> = ({}) => {
-  const [activeItem, setActiveItem] = useState("Messages");
+  const [activeItem, setActiveItem] = useState("Dashboard");
   const [isNavigating, setIsNavigating] = useState(false);
   const [userName, setUserName] = useState<string>("");
   const [username, setUsername] = useState<string>("");
@@ -44,17 +42,17 @@ const DoctorSidebar: React.FC<DoctorSidebarProps> = ({}) => {
 
   const menuItems = [
     { text: "Dashboard", icon: House, path: "/doctordashboard" },
-    { text: "Messages", icon: ChatCircle, path: "/doctormessages" },
     {
       text: "My Patients",
       icon: IdentificationBadge,
       path: "/doctorpatients",
     },
     { text: "My Appointments", icon: Calendar, path: "/doctorappointments" },
+    { text: "Profile", icon: IdentificationBadge, path: "/doctor-profile" },
   ];
 
   const bottomItems = [
-    { text: "Bug Report", icon: Bug, path: "/doctor-bug-report" },
+    { text: "Help & Support", icon: Question, path: "/doctor-help-support" },
     { text: "Logout", icon: SignOut, path: "/logout" },
   ];
 

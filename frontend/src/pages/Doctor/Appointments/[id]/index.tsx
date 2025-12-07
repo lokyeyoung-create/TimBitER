@@ -3,7 +3,6 @@ import {
   Clock,
   ListBullets,
   Note,
-  Pill,
   Warning,
 } from "phosphor-react";
 import { useEffect, useState } from "react";
@@ -25,8 +24,6 @@ import {
 } from "phosphor-react";
 import PrimaryButton from "components/buttons/PrimaryButton";
 import toast from "react-hot-toast";
-import { medorderService } from "api/services/medorder.service";
-import PrescribeMedicationModal from "components/modal/RefillModal";
 import { doctorService } from "api/services/doctor.service";
 import CancelAppointmentModal from "components/modal/CancelAppointmentModal";
 
@@ -353,27 +350,6 @@ const AppointmentDetails: React.FC = () => {
     }
   };
 
-  const handlePrescribe = async (prescriptionData: any) => {
-    setIsLoading(true);
-    try {
-      const response = await medorderService.createMedorder(prescriptionData);
-
-      if (response.success) {
-        console.log("Prescription created successfully:", response.medorder);
-        toast.success("Prescription sent successfully!");
-        setIsPrescribeModalOpen(false);
-
-        // Optionally, you can send an email notification here
-        // await appointmentService.notifyPatientOfPrescription(...)
-      }
-    } catch (error) {
-      console.error("Error creating prescription:", error);
-      toast.error("Failed to create prescription. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -566,21 +542,6 @@ const AppointmentDetails: React.FC = () => {
               Mark No-Show
             </button>
           </div>
-          <PrimaryButton
-            onClick={() => setIsPrescribeModalOpen(true)}
-            text="Prescribe Medications"
-            variant="primary"
-            size="medium"
-          />
-
-          <PrescribeMedicationModal
-            isOpen={isPrescribeModalOpen}
-            onClose={() => setIsPrescribeModalOpen(false)}
-            patientName={`${patient?.user.firstName} ${patient?.user.lastName}`}
-            patientID={patientId || patient?._id || ""}
-            doctorID={doctorId} // <-- Use the state variable
-            onComplete={handlePrescribe}
-          />
 
           {/* After Visit Summary Upload */}
           <div

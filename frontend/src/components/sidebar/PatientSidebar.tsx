@@ -3,15 +3,10 @@ import { useNavigate } from "react-router-dom";
 import IconSidebar from "./IconSidebar";
 import {
   House,
-  ChatCircle,
   FileText,
-  Pill,
-  Bug,
   Question,
   Calendar,
-  Cards,
   SignOut,
-  Receipt,
 } from "phosphor-react";
 
 import UserProfileCard from "../card/UserProfileCard";
@@ -25,7 +20,7 @@ interface PatientSidebarProps {
 }
 
 const PatientSidebar: React.FC<PatientSidebarProps> = ({}) => {
-  const [activeItem, setActiveItem] = useState("Messages");
+  const [activeItem, setActiveItem] = useState("Dashboard");
   const [isNavigating, setIsNavigating] = useState(false);
   const [userName, setUserName] = useState<string>("");
   const [username, setUsername] = useState<string>("");
@@ -50,15 +45,13 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({}) => {
 
   const menuItems = [
     { text: "Dashboard", icon: House, path: "/patientdashboard" },
-    { text: "Messages", icon: ChatCircle, path: "/messages" },
     { text: "Appointments", icon: Calendar, path: "/appointments" },
-    { text: "Medications", icon: Pill, path: "/medications" },
-    { text: "Insurance Card", icon: Cards, path: "/insurance" },
-    { text: "Invoices", icon: Receipt, path: "/view-invoices" },
+    { text: "Medical Records", icon: FileText, path: "/medical-records" },
+    { text: "Profile", icon: FileText, path: "/patient-profile" },
   ];
 
   const bottomItems = [
-    { text: "Bug Report", icon: Bug, path: "/bug-report" },
+    { text: "Help & Support", icon: Question, path: "/help-support" },
     { text: "Logout", icon: SignOut, path: "/logout" },
   ];
 

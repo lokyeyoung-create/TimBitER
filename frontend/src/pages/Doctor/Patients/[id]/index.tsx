@@ -4,25 +4,20 @@ import {
   CaretLeft,
   User,
   Calendar,
-  Pill,
   Phone,
   EnvelopeSimple,
   MapPin,
   Heartbeat,
   Warning,
-  ChatCircle,
   Cake,
   Notepad,
 } from "phosphor-react";
 import { Patient } from "api/types/patient.types";
-import { MedorderResponse } from "api/types/medorder.types";
 import { EnhancedAppointment } from "api/types/appointment.types";
 import { patientService } from "api/services/patient.service";
-import { medorderService } from "api/services/medorder.service";
 import { appointmentService } from "api/services/appointment.service";
 import ProfileAvatar from "components/avatar/Avatar";
 import SmallInfoCard from "components/card/SmallInfoCard";
-import LargeMedicationCard from "components/card/LargeMedicationCard";
 import UpcomingAppointmentCard from "components/card/UpcomingAppointmentCard";
 import PrimaryButton from "components/buttons/PrimaryButton";
 import toast from "react-hot-toast";
@@ -31,7 +26,6 @@ const PatientProfile: React.FC = () => {
   const { patientId } = useParams<{ patientId: string }>();
   const navigate = useNavigate();
   const [patient, setPatient] = useState<Patient | null>(null);
-  const [medications, setMedications] = useState<MedorderResponse[]>([]);
   const [appointments, setAppointments] = useState<EnhancedAppointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<
@@ -57,19 +51,6 @@ const PatientProfile: React.FC = () => {
         }
 
         setPatient(patientData as Patient);
-
-        // Fetch medications
-        console.log("Fetching medications for patient ID:", patientId);
-        try {
-          const medsResponse = await medorderService.getMedordersByPatient(
-            patientId
-          );
-          console.log("Medications found:", medsResponse.medorders);
-          setMedications(medsResponse.medorders || []);
-        } catch (err) {
-          console.log("No medications found for patient:", err);
-          setMedications([]);
-        }
 
         // Fetch appointments
         console.log("Fetching appointments for patient ID:", patientId);
@@ -115,9 +96,6 @@ const PatientProfile: React.FC = () => {
         return "bg-blue-50 text-blue-700 border-blue-200";
     }
   };
-  const handleRefillRequest = async (medicationId: string) => {};
-
-  const handleDeleteMedication = async (medicationId: string) => {};
 
   const handleAppointmentClick = (appointmentId: string) => {
     navigate(`/appointments/${appointmentId}?patientId=${patientId}`);
@@ -201,15 +179,6 @@ const PatientProfile: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="justify-end align-bottom gap-3">
-            <PrimaryButton
-              onClick={handleMessagePatient}
-              text="Message Patient"
-              variant="outline"
-              size="medium"
-              icon={<ChatCircle size={20} />}
-            />
-          </div>
         </div>
       </div>
 
@@ -225,16 +194,6 @@ const PatientProfile: React.FC = () => {
             }`}
           >
             Overview
-          </button>
-          <button
-            onClick={() => setActiveTab("medications")}
-            className={`py-4 px-2 border-b-2 transition-colors ${
-              activeTab === "medications"
-                ? "border-primary text-primary font-medium"
-                : "border-transparent text-secondaryText hover:text-primaryText"
-            }`}
-          >
-            Medications ({medications.length})
           </button>
           <button
             onClick={() => setActiveTab("appointments")}
@@ -265,12 +224,6 @@ const PatientProfile: React.FC = () => {
                 icon={Calendar}
                 title="Upcoming"
                 value={upcomingAppointments.length.toString()}
-                width="full"
-              />
-              <SmallInfoCard
-                icon={Pill}
-                title="Active Medications"
-                value={medications.length.toString()}
                 width="full"
               />
               <SmallInfoCard
@@ -321,146 +274,7 @@ const PatientProfile: React.FC = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Recent Medications & Appointments */}
-              <div className="flex flex-col gap-6">
-                {/* Recent Medications */}
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-semibold text-primaryText">
-                      Recent Medications
-                    </h3>
-                    {medications.length > 3 && (
-                      <button
-                        onClick={() => setActiveTab("medications")}
-                        className="text-sm text-primary hover:underline"
-                      >
-                        View All
-                      </button>
-                    )}
-                  </div>
-                  {medications.length > 0 ? (
-                    <div className="space-y-3">
-                      {medications.slice(0, 3).map((med) => (
-                        <div
-                          key={med.orderID}
-                          className="bg-white p-4 rounded-lg border border-stroke"
-                        >
-                          <div className="flex items-start gap-3">
-                            <Pill size={24} className="text-primary mt-1" />
-                            <div className="flex-1">
-                              <h4 className="font-medium text-primaryText">
-                                {med.medicationName}
-                              </h4>
-                              <p className="text-sm text-secondaryText mt-1">
-                                {med.instruction}
-                              </p>
-                              <p className="text-xs text-secondaryText mt-2">
-                                Prescribed:{" "}
-                                {new Date(
-                                  med.prescribedOn
-                                ).toLocaleDateString()}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="bg-white p-6 rounded-lg border border-stroke text-center">
-                      <p className="text-secondaryText">No medications</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Upcoming Appointments */}
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-semibold text-primaryText">
-                      Upcoming Appointments
-                    </h3>
-                    {upcomingAppointments.length > 3 && (
-                      <button
-                        onClick={() => setActiveTab("appointments")}
-                        className="text-sm text-primary hover:underline"
-                      >
-                        View All
-                      </button>
-                    )}
-                  </div>
-                  {upcomingAppointments.length > 0 ? (
-                    <div className="space-y-3">
-                      {upcomingAppointments.slice(0, 3).map((apt) => (
-                        <div key={apt._id}>
-                          <UpcomingAppointmentCard
-                            date={new Date(apt.startTime).toLocaleDateString(
-                              "en-US",
-                              {
-                                weekday: "long",
-                                month: "long",
-                                day: "numeric",
-                                year: "numeric",
-                              }
-                            )}
-                            doctorName={
-                              typeof apt.doctorID === "object"
-                                ? `Dr.`
-                                : "Doctor"
-                            }
-                            appointmentType={apt.summary || "Consultation"}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="bg-white p-6 rounded-lg border border-stroke text-center">
-                      <p className="text-secondaryText">
-                        No upcoming appointments
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
             </div>
-          </div>
-        )}
-
-        {activeTab === "medications" && (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-semibold text-primaryText mb-4">
-              All Medications
-            </h2>
-            {medications.length > 0 ? (
-              medications.map((med) => (
-                <LargeMedicationCard
-                  key={med.orderID}
-                  medicationId={med.orderID}
-                  medicationName={med.medicationName}
-                  medicationNotes={med.instruction}
-                  lastRequested={
-                    med.lastRefillDate
-                      ? new Date(med.lastRefillDate)
-                      : undefined
-                  }
-                  prescribedOn={new Date(med.prescribedOn)}
-                  refillDetails={med.quantity || "N/A"}
-                  pharmacyDetails="TimbitER Pharmacy"
-                  onRefillRequest={handleRefillRequest}
-                  onDelete={handleDeleteMedication}
-                  isPatient={false}
-                />
-              ))
-            ) : (
-              <div className="bg-white p-12 rounded-xl border border-stroke text-center">
-                <Pill size={64} className="mx-auto text-gray-300 mb-4" />
-                <p className="text-lg text-primaryText font-medium">
-                  No medications prescribed
-                </p>
-                <p className="text-sm text-secondaryText mt-2">
-                  This patient has no active medications
-                </p>
-              </div>
-            )}
           </div>
         )}
 

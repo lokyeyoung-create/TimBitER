@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from "react";
 import {
   User,
-  Calendar,
   EnvelopeSimple,
   Phone,
   GraduationCap,
   ClipboardText,
   CaretLeft,
-  ChatCircle,
 } from "phosphor-react";
 import { useNavigate, useParams } from "react-router-dom";
 import ProfileAvatar from "components/avatar/Avatar";
-import ProfileInfo from "components/card/ProfileInfoCard";
 import PrimaryButton from "components/buttons/PrimaryButton";
 import { doctorService } from "api/services/doctor.service";
+import FollowButton from "components/FollowButton/FollowButton";
+import BookmarkButton from "components/BookmarkButton/BookmarkButton";
+import ReviewsSection from "components/Reviews/ReviewsSection";
+import { getFollowStats } from "api/services/follow.service";
+import { useAuth } from "contexts/AuthContext";
 import toast from "react-hot-toast";
 
 const PublicDoctorProfile: React.FC = () => {
@@ -22,6 +24,8 @@ const PublicDoctorProfile: React.FC = () => {
 
   const [doctor, setDoctor] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const { user } = useAuth();
+  const [followStats, setFollowStats] = useState<{ followers: number; following: number } | null>(null);
 
   useEffect(() => {
     const fetchDoctor = async () => {
@@ -40,6 +44,17 @@ const PublicDoctorProfile: React.FC = () => {
     };
 
     fetchDoctor();
+    // load follow stats as well
+    const loadStats = async () => {
+      if (!doctorId) return;
+      try {
+        const s = await getFollowStats(doctorId);
+        setFollowStats({ followers: s?.followers || 0, following: s?.following || 0 });
+      } catch (e) {
+        // ignore
+      }
+    };
+    loadStats();
   }, [doctorId]);
 
   const formatDate = (dateString: string | undefined) => {
@@ -50,10 +65,6 @@ const PublicDoctorProfile: React.FC = () => {
       month: "long",
       year: "numeric",
     });
-  };
-
-  const handleMessageDoctor = () => {
-    navigate(`/messages?doctorId=${doctorId}`);
   };
 
   const handleScheduleAppointment = () => {
@@ -110,33 +121,32 @@ const PublicDoctorProfile: React.FC = () => {
             <div>
               <h1 className="text-3xl font-semibold mb-2">{doctorName}</h1>
               {doctor.speciality && (
-                <p className="text-xl text-white/90 mb-4">
-                  {doctor.speciality}
-                </p>
+                <p className="text-xl text-white/90 mb-4">{doctor.speciality}</p>
               )}
-              <div className="flex flex-col gap-2 text-white/90 text-sm">
-                {doctorUser?.email && (
-                  <div className="flex items-center gap-2">
-                    <EnvelopeSimple size={16} />
-                    {doctorUser.email}
+              <div className="flex items-center gap-4 mt-2">
+                <div className="text-white/90 text-sm">
+                  <div className="flex items-center gap-3">
+                    <User size={16} />
+                    <span>{doctorUser?.firstName} {doctorUser?.lastName}</span>
                   </div>
-                )}
-                {doctorUser?.phoneNumber && (
-                  <div className="flex items-center gap-2">
-                    <Phone size={16} />
-                    {doctorUser.phoneNumber}
+                  <div className="flex items-center gap-3 mt-2">
+                    <span className="text-xs text-white/80">Followers:</span>
+                    <span className="font-medium">{followStats?.followers ?? '-'}</span>
+                    <span className="ml-4 text-xs text-white/80">Following:</span>
+                    <span className="font-medium">{followStats?.following ?? '-'}</span>
                   </div>
-                )}
+                </div>
               </div>
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 items-center">
+            <FollowButton targetUserId={doctorUser?._id} />
+            <BookmarkButton itemId={doctorId || ''} itemType="user" itemName={doctorName} />
             <PrimaryButton
-              onClick={handleMessageDoctor}
-              text="Message"
-              variant="outline"
+              onClick={handleScheduleAppointment}
+              text="Book"
+              variant="primary"
               size="medium"
-              icon={<ChatCircle size={20} />}
             />
           </div>
         </div>
@@ -211,32 +221,55 @@ const PublicDoctorProfile: React.FC = () => {
             Contact Information
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {doctorUser?.email && (
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                  <EnvelopeSimple size={20} className="text-primary" />
+            {(() => {
+              const isOwner = user && doctorUser && user._id === doctorUser._id;
+              if (isOwner) {
+                return (
+                  <>
+                    {doctorUser?.email && (
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                          <EnvelopeSimple size={20} className="text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-secondaryText">Email</p>
+                          <p className="text-sm text-primaryText">{doctorUser.email}</p>
+                        </div>
+                      </div>
+                    )}
+                    {doctorUser?.phoneNumber && (
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                          <Phone size={20} className="text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-secondaryText">Phone</p>
+                          <p className="text-sm text-primaryText">{doctorUser.phoneNumber}</p>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                );
+              }
+
+              // not owner
+              return (
+                <div className="col-span-full">
+                  <p className="text-secondaryText mb-3">Contact details are hidden.</p>
+                  <div className="flex gap-3">
+                    <PrimaryButton onClick={handleScheduleAppointment} text="Book an appointment" variant="primary" size="small" />
+                    {!user && (
+                      <PrimaryButton onClick={() => navigate('/login')} text="Login to view" variant="outline" size="small" />
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs text-secondaryText">Email</p>
-                  <p className="text-sm text-primaryText">{doctorUser.email}</p>
-                </div>
-              </div>
-            )}
-            {doctorUser?.phoneNumber && (
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                  <Phone size={20} className="text-primary" />
-                </div>
-                <div>
-                  <p className="text-xs text-secondaryText">Phone</p>
-                  <p className="text-sm text-primaryText">
-                    {doctorUser.phoneNumber}
-                  </p>
-                </div>
-              </div>
-            )}
+              );
+            })()}
           </div>
         </div>
+
+        {/* Reviews Section */}
+        <ReviewsSection doctorId={doctorId || ''} doctorName={doctorName} />
       </div>
     </div>
   );

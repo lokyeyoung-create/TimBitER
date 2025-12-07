@@ -24,8 +24,6 @@ interface SignupData {
   education: string;
   graduationDate: string;
   speciality: string;
-  insuranceCardFront: File | null;
-  insuranceCardBack: File | null;
 }
 
 interface SignupContextValue {
@@ -60,8 +58,6 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     education: "",
     graduationDate: "",
     speciality: "",
-    insuranceCardFront: null,
-    insuranceCardBack: null,
   });
 
   const setSignupData = (data: Partial<SignupData>) => {

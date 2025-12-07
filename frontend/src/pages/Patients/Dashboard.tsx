@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import DoctorSearchBar from "../../components/input/SearchBar";
-import MedicationCard from "../../components/card/MedicationCard";
 import UpcomingAppointmentCard from "../../components/card/UpcomingAppointmentCard";
 import DoctorSearchResults from "../../components/dashboard/DoctorSearchResults";
 import AppointmentBookingModal from "../../components/modal/BookingModal";
@@ -8,11 +7,9 @@ import PrimaryButton from "../../components/buttons/PrimaryButton";
 import { useRequireRole } from "hooks/useRequireRole";
 import { useAuth } from "contexts/AuthContext";
 import LongTextArea from "../../components/input/LongTextArea";
-import ChatModal from "components/modal/ChatsModal";
-import { MedorderResponse } from "api/types/medorder.types";
 import { AvailableDoctorResult, TimeSlot } from "api/types/availability.types";
 import toast from "react-hot-toast";
-import { patientService, medorderService, availabilityService } from "api";
+import { patientService, availabilityService } from "api";
 import { appointmentService } from "api/services/appointment.service";
 import { useNavigate } from "react-router-dom";
 
@@ -34,13 +31,6 @@ const Dashboard: React.FC = () => {
     date: string;
   } | null>(null);
   const [searchError, setSearchError] = useState<string | null>(null);
-  const [chatMessages, setChatMessages] = useState<
-    { sender: "user" | "bot"; text: string }[]
-  >([]);
-  const [chatModalOpen, setChatModalOpen] = useState(false);
-  const [chatInput, setChatInput] = useState("");
-
-  const [isBotTyping, setIsBotTyping] = useState(false);
 
   // State
   const [patientId, setPatientId] = useState("");
@@ -48,8 +38,6 @@ const Dashboard: React.FC = () => {
   const [isTestingEmail, setIsTestingEmail] = useState(false);
   const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([]);
   const [loadingAppointments, setLoadingAppointments] = useState(true);
-  const [medications, setMedications] = useState<MedorderResponse[]>([]);
-  const [loadingMedications, setLoadingMedications] = useState(true);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
 
@@ -114,24 +102,6 @@ const Dashboard: React.FC = () => {
       }
     };
     fetchAppointments();
-  }, [patientId]);
-  useEffect(() => {
-    const fetchMedications = async () => {
-      if (!patientId) return;
-
-      try {
-        setLoadingMedications(true);
-        const response = await medorderService.getMedordersByPatient(patientId);
-        setMedications(response.medorders);
-      } catch (err) {
-        console.error("Error fetching medications:", err);
-        toast.error("Failed to load medications");
-      } finally {
-        setLoadingMedications(false);
-      }
-    };
-
-    fetchMedications();
   }, [patientId]);
 
   // EMAIL TEST FUNCTION
@@ -233,35 +203,6 @@ const Dashboard: React.FC = () => {
       console.error(err);
       setSearchError("Failed to search for doctors. Please try again.");
       setSearchResults([]);
-    }
-  };
-  const handleRefillRequest = async (medicationId: string) => {
-    try {
-      const medication = medications.find(
-        (med) => med.orderID === medicationId
-      );
-      if (!medication) return;
-
-      // Send refill request email
-      await fetch("http://localhost:5050/api/medorders/refill-request", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          medicationName: medication.medicationName,
-          patientName: `${medication.patientID.name}`,
-          patientEmail: medication.patientID.email,
-          quantity: medication.quantity,
-          pharmacy: "TimbitER Pharmacy",
-          lastRefillDate: medication.lastRefillDate,
-        }),
-      });
-
-      toast.success("Refill request sent successfully!");
-    } catch (error) {
-      console.error("Error requesting refill:", error);
-      toast.error("Failed to request refill. Please try again.");
     }
   };
   // Updated handleBookAppointment function in Dashboard.tsx
@@ -498,41 +439,6 @@ const Dashboard: React.FC = () => {
     setSearchDate("");
   };
 
-  const handleAskQuestion = async (newMessage: string) => {
-    const updatedMessages: { sender: "user" | "bot"; text: string }[] = [
-      ...chatMessages,
-      { sender: "user", text: newMessage },
-    ];
-
-    setIsBotTyping(true);
-
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: updatedMessages }), // send full context
-      });
-
-      const data = await res.json();
-      setChatMessages([
-        ...updatedMessages,
-        { sender: "bot", text: data.answer },
-      ]);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsBotTyping(false);
-    }
-  };
-
-  const handleSendChat = async (messageText?: string) => {
-    const trimmed = (messageText || chatInput).trim();
-    if (!trimmed || isBotTyping) return;
-
-    await handleAskQuestion(trimmed);
-    setChatInput(""); 
-  };
-
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString("en-US", {
@@ -638,87 +544,6 @@ const Dashboard: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-9 gap-8">
               {/* LEFT SIDE */}
               <div className="lg:col-span-6">
-                <div className="mb-4">
-                  <div className="mb-6">
-                    <h2 className="flex justify-start text-xl font-md text-primaryText mb-2">
-                      Ask me a question
-                    </h2>
-                    <p className="flex justify-start text-sm text-secondaryText mb-4">
-                      This is your AI chatbot to help answer questions on your
-                      appointments.
-                    </p>
-
-                    <LongTextArea
-                      placeholder="Ask a question here..."
-                      buttonText={isBotTyping ? "Sending..." : "Submit"}
-                      onSubmit={async (text) => {
-                        if (!text.trim() || isBotTyping) return;
-                        await handleAskQuestion(text);
-                        setChatModalOpen(true);
-                      }}
-                      button={true}
-                    />
-                  </div>
-                </div>
-                <ChatModal
-                  isOpen={chatModalOpen}
-                  onClose={() => setChatModalOpen(false)}
-                  chatMessages={chatMessages}
-                  chatInput={chatInput}
-                  setChatInput={setChatInput}
-                  onSend={handleSendChat}
-                  isBotTyping={isBotTyping}
-                />
-
-                {/* MEDICATIONS */}
-                <h2 className="mt-10 text-xl font-md text-primaryText mb-2">
-                  My Medications
-                </h2>
-                <p className="text-sm text-secondaryText mb-4"></p>
-
-                {loadingMedications ? (
-                  <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  </div>
-                ) : medications.length > 0 ? (
-                  <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-4">
-                      {medications.slice(0, 3).map((medication) => (
-                        <MedicationCard
-                          key={medication.orderID}
-                          medicationId={medication.orderID}
-                          medicationName={medication.medicationName}
-                          instruction={medication.instruction}
-                          quantity={medication.quantity || "N/A"}
-                          pharmacy="TimbitER Pharmacy"
-                          lastRefillDate={
-                            medication.lastRefillDate
-                              ? new Date(
-                                  medication.lastRefillDate
-                                ).toLocaleDateString()
-                              : undefined
-                          }
-                          onRefillRequest={handleRefillRequest}
-                        />
-                      ))}
-                    </div>
-
-                    <div className="text-right text-sm font-sm mt-4">
-                      {medications.length > 3 && (
-                        <button
-                          onClick={() => navigate("/medications")}
-                          className="text-secondaryText hover:text-primaryText transition-colors"
-                        >
-                          See {medications.length - 3} More
-                        </button>
-                      )}
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-center py-8 text-secondaryText">
-                    <p>No medications prescribed yet</p>
-                  </div>
-                )}
               </div>
 
               {/* RIGHT SIDE */}
